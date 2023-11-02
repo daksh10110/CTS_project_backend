@@ -3,13 +3,21 @@ const jwt = require('jsonwebtoken')
 const router = express.Router();
 const User = require('../models/Client');
 const { SECRET } = require('../utils/config');
+const { Op } = require('sequelize');
 
 router.get('/', async (req, res) => {
   const users = await User.findAll({
-    attributes: ['id', 'ip', 'mac', 'age', 'loginTime', 'logoutTime']
+    attributes: ['id', 'ip', 'mac', 'age', 'loginTime', 'logoutTime'],
+    where: {
+      loginTime: {
+        [Op.not]: null
+      }
+    }
   });
+
   res.json(users);
 });
+
 
 router.get('/me', async (req, res) => {
   const token = req.token

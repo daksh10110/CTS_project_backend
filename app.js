@@ -5,7 +5,6 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 require("express-async-errors")
 var cors = require("cors");
-var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth');
 const { tokenExtractor, tokenValidator, errorHandler } = require('./utils/middleware');
@@ -28,7 +27,6 @@ app.use('/auth', authRouter);
 app.use(tokenExtractor);
 app.use(tokenValidator);
 
-app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 app.use(function(req, res, next) {
