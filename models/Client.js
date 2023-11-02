@@ -34,11 +34,11 @@ Client.init(
     },
     mac: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     age: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
     },
     password: {
       type: DataTypes.STRING,
