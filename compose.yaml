@@ -10,5 +10,13 @@ services:
         volumes:
             - postgres_data:/var/lib/postgresql/data
 
+    server:
+        build: .
+        ports:
+            - "3001:3001"
+        volumes:
+            - .:/usr/src/app
+
+
 volumes:
     postgres_data:
