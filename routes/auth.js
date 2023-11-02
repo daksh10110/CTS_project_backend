@@ -60,4 +60,36 @@ router.post('/login', async (req, res) => {
 	}
 });
 
+router.post('/logout', async (req, res) => {
+  const authorization = req.get("authorization");
+
+  if (!authorization || !authorization.toLowerCase().startsWith("bearer ")) {
+    return res.status(401).json({ message: 'Token not found' });
+  }
+
+  const token = authorization.substring(7);
+
+  try {
+    const decoded = jwt.verify(token, SECRET);
+    const userId = decoded.id;
+
+    const client = await Client.findByPk(userId);
+
+    if (client) {
+      if (!client.logoutTime) {
+        client.logoutTime = new Date();
+        await client.save();
+        return res.status(200).json({ message: 'Logout successful' });
+      } else {
+        return res.status(401).json({ message: 'Logout Failed' });
+      }
+    } else {
+      return res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
+
 module.exports = router;
