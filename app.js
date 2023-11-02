@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors())
 
 
-app.use(authRouter);
+app.use('/auth', authRouter);
 
 // app.use(tokenExtractor);
 // app.use(tokenValidator);

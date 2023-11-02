@@ -40,9 +40,13 @@ Client.init(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     loginTime: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
       defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
     },
     logoutTime: {
