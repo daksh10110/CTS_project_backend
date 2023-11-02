@@ -1,22 +1,14 @@
+const { SECRET } = require("./config")
 const logger = require("./logger")
 const jwt = require("jsonwebtoken")
 
-const errorHandler = (error, request, response, next) => {
-	logger.error(error.message)
-
-	if (error.name === "CastError") {
-		return response.status(400).send({ error: "malformatted id" })
-	} else if (error.name === "ValidationError") {
-		return response.status(400).json({ error: error.message })
-	} else if (error.name === "JsonWebTokenError") {
-		return response.status(401).json({
-			error: "invalid token"
-		})
-	}
-
-	logger.error(error.message)
-	next(error)
-}
+const errorHandler = (error, req, res, next) => {
+	res.locals.message = error.message;
+	res.locals.error = req.app.get('env') === 'development' ? error : {};
+  
+	res.status(error.status || 500).render('error');
+};
+  
 
 const tokenExtractor = (request, response, next) => {
 	const authorization = request.get("authorization")
@@ -33,7 +25,8 @@ const tokenValidator = (request, response, next) => {
 		return response.status(401).json({ error: "token missing" })
 	}
 
-	const decodedToken = jwt.verify(token, process.env.SECRET)
+	const decodedToken = jwt.verify(token, SECRET)
+	console.log(decodedToken);
 	if (!decodedToken.id) {
 		return response.status(401).json({ error: "invalid token" })
 	}
