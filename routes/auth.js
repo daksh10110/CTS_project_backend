@@ -4,37 +4,13 @@ const Client = require("../models/Client");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { SECRET } = require("../utils/config");
-const { exec } = require("child_process");
-
-const getMACAddressByIP = (ipAddress) =>
-    new Promise((resolve, reject) => {
-        exec(`sudo arp ${ipAddress}`, (error, stdout, stderr) => {
-            if (error) {
-                reject(`Error executing command: ${error}`);
-                return;
-            }
-
-            if (stderr) {
-                reject(`Command execution error: ${stderr}`);
-                return;
-            }
-
-            const lines = stdout.trim().split("\n");
-            if (lines.length >= 2) {
-                const columns = lines[1].split(/\s+/);
-                const macAddress = columns[2];
-                resolve(macAddress);
-            } else {
-                reject("MAC Address not found");
-            }
-        });
-    });
+const arp = require("@network-utils/arp-lookup");
 
 router.post("/signup", async (req, res) => {
     try {
         const { name, email, password, phoneNumber, age } = req.body;
         const ip = req.ip;
-        const mac = getMACAddressByIP(ip);
+        const mac = await arp.toMAC(ip);
 
         const hashedPassword = bcrypt.hashSync(password, 10);
 
@@ -78,7 +54,8 @@ router.post("/login", async (req, res) => {
             }
 
             client.ip = req.ip;
-            client.mac = getMACAddressByIP(req.ip);
+            console.log(req.ip);
+            client.mac = await arp.toMAC(req.ip);
             await client.save();
 
             const token = jwt.sign({ id: client.id }, SECRET, {
