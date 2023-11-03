@@ -16,6 +16,7 @@ services:
             - "3001:3001"
         volumes:
             - .:/usr/src/app
+        network_mode: "host"
 
 
 volumes:

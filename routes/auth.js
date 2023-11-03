@@ -6,10 +6,22 @@ const jwt = require("jsonwebtoken");
 const { SECRET } = require("../utils/config");
 const arp = require("@network-utils/arp-lookup");
 
+const extractIPv4 = (ipAddress) => {
+    const parts = ipAddress.split(':');
+    const ipv4 = parts[parts.length - 1];
+  
+    const validIPv4Regex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+    if (validIPv4Regex.test(ipv4)) {
+        return ipv4;
+    } else {
+        return null;
+    }
+};
+
 router.post("/signup", async (req, res) => {
     try {
         const { name, email, password, phoneNumber, age } = req.body;
-        const ip = req.ip;
+        const ip = extractIPv4(req.ip);
         const mac = await arp.toMAC(ip);
 
         const hashedPassword = bcrypt.hashSync(password, 10);
@@ -42,7 +54,6 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
-
         const client = await Client.findOne({ where: { email } });
 
         if (client && bcrypt.compareSync(password, client.password)) {
@@ -53,9 +64,8 @@ router.post("/login", async (req, res) => {
                 client.loginTime = new Date();
             }
 
-            client.ip = req.ip;
-            console.log(req.ip);
-            client.mac = await arp.toMAC(req.ip);
+            client.ip = extractIPv4(req.ip);
+            client.mac = await arp.toMAC(client.ip);
             await client.save();
 
             const token = jwt.sign({ id: client.id }, SECRET, {

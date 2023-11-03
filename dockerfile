@@ -11,7 +11,7 @@ COPY . .
 # Set Environment Variables (Update with actual credentials and URL)
 ENV PORT=3001
 ENV NODE_ENV=production
-ENV DATABASE_URL="postgresql://myuser:secret@postgres:5432/mydatabase"
+ENV DATABASE_URL="postgresql://myuser:secret@localhost:5432/mydatabase"
 ENV SECRET="your_secret_key_here"
 
 EXPOSE $PORT
