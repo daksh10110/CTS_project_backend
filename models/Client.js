@@ -7,7 +7,7 @@ class Client extends Model {}
 Client.init(
     {
         id: {
-            type: DataTypes.STRING,
+            type: DataTypes.UUID,
             primaryKey: true,
             defaultValue: ulid,
         },

@@ -8,7 +8,7 @@ class Log extends Model {}
 Log.init(
     {
         id: {
-            type: DataTypes.STRING,
+            type: DataTypes.UUID,
             primaryKey: true,
             defaultValue: ulid,
         },
