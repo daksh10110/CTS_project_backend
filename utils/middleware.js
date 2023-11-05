@@ -25,11 +25,19 @@ const tokenValidator = (request, response, next) => {
     }
 
     const decodedToken = jwt.verify(token, SECRET);
-    console.log(decodedToken);
     if (!decodedToken.id) {
         return response.status(401).json({ error: "invalid token" });
     }
     next();
 };
 
-module.exports = { errorHandler, tokenExtractor, tokenValidator };
+const adminValidator = (request, response, next) => {
+    const token = request.token;
+    const decodedToken = jwt.verify(token, SECRET);
+    if (!decodedToken.isAdmin) {
+        return response.status(404).json({ error: "user not an admin" })
+    }
+    next();
+}
+
+module.exports = { errorHandler, tokenExtractor, tokenValidator, adminValidator };

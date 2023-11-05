@@ -18,10 +18,19 @@ Client.init(
         email: {
             type: DataTypes.STRING,
             allowNull: false,
+            unique: true
         },
         phoneNumber: {
             type: DataTypes.STRING,
             allowNull: false,
+        },
+        location: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        job: {
+            type: DataTypes.STRING,
+            allowNull: true,
         },
         accountCreatedDate: {
             type: DataTypes.DATE,
@@ -49,10 +58,15 @@ Client.init(
             allowNull: true,
             defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
         },
-        logoutTime: {
+        lastLogin: {
             type: DataTypes.DATE,
             allowNull: true,
         },
+        isAdmin: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            allowNull: true,
+        }
     },
     {
         sequelize,

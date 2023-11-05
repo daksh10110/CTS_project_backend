@@ -1,36 +1,23 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
-const User = require("../models/Client");
+const Client = require("../models/Client");
 const { SECRET } = require("../utils/config");
 const { Op } = require("sequelize");
 
 router.get("/", async (req, res) => {
-    const users = await User.findAll({
-        attributes: ["id", "ip", "mac", "age", "loginTime", "logoutTime"],
-        where: {
-            loginTime: {
-                [Op.not]: null,
-            },
-        },
-    });
-
-    res.json(users);
-});
-
-router.get("/me", async (req, res) => {
     const token = req.token;
     const decoded = jwt.verify(token, SECRET);
     const userId = decoded.id;
 
-    const user = await User.findByPk(userId, {
-        attributes: { exclude: ["password", "logoutTime"] },
+    const user = await Client.findByPk(userId, {
+        attributes: { exclude: ["password", "isAdmin"] },
     });
 
     if (user) {
         res.json(user);
     } else {
-        res.status(404).json({ message: "User not found" });
+        res.status(404).json({ message: "Client not found" });
     }
 });
 

@@ -7,10 +7,12 @@ require("express-async-errors");
 var cors = require("cors");
 var usersRouter = require("./routes/users");
 var authRouter = require("./routes/auth");
+var adminRouter = require("./routes/admin")
 const {
     tokenExtractor,
     tokenValidator,
     errorHandler,
+    adminValidator
 } = require("./utils/middleware");
 
 var app = express();
@@ -30,7 +32,10 @@ app.use("/auth", authRouter);
 app.use(tokenExtractor);
 app.use(tokenValidator);
 
-app.use("/users", usersRouter);
+app.use("/user", usersRouter);
+
+app.use(adminValidator);
+app.use("/admin", adminRouter);
 
 app.use(function (req, res, next) {
     next(createError(404));

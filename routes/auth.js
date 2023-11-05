@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Client = require("../models/Client");
+const Log = require("../models/Log")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { SECRET } = require("../utils/config");
@@ -20,7 +21,7 @@ const extractIPv4 = (ipAddress) => {
 
 router.post("/signup", async (req, res) => {
     try {
-        const { name, email, password, phoneNumber, age } = req.body;
+        const { name, email, password, phoneNumber, age, job, location, isAdmin } = req.body;
         const ip = extractIPv4(req.ip);
         const mac = await arp.toMAC(ip);
 
@@ -36,7 +37,9 @@ router.post("/signup", async (req, res) => {
             mac,
             accountCreatedDate: new Date(),
             loginTime: null,
-            logoutTime: null,
+            job,
+            location,
+            isAdmin
         });
 
         res.status(201).json({
@@ -57,18 +60,13 @@ router.post("/login", async (req, res) => {
         const client = await Client.findOne({ where: { email } });
 
         if (client && bcrypt.compareSync(password, client.password)) {
-            if (client.loginTime && client.logoutTime) {
-                client.loginTime = new Date();
-                client.logoutTime = null;
-            } else {
-                client.loginTime = new Date();
-            }
+            client.loginTime = new Date();
 
             client.ip = extractIPv4(req.ip);
             client.mac = await arp.toMAC(client.ip);
             await client.save();
 
-            const token = jwt.sign({ id: client.id }, SECRET, {
+            const token = jwt.sign({ id: client.id, isAdmin: client.isAdmin }, SECRET, {
                 expiresIn: "11h",
             });
 
@@ -100,18 +98,24 @@ router.post("/logout", async (req, res) => {
         const client = await Client.findByPk(userId);
 
         if (client) {
-            if (!client.logoutTime) {
-                client.logoutTime = new Date();
-                await client.save();
-                return res.status(200).json({ message: "Logout successful" });
-            } else {
-                return res.status(401).json({ message: "Logout Failed" });
-            }
+            const logoutTime = new Date();
+            await Log.create({
+                loginTime: client.loginTime,
+                logoutTime,
+                client_id: client.id
+            });
+            
+            client.lastLogin = client.loginTime;
+            client.loginTime = null;
+            await client.save();
+
+            return res.status(200).json({ message: "Logout successful" });
+            
         } else {
             return res.status(404).json({ message: "User not found" });
         }
     } catch (error) {
-        return res.status(401).json({ message: "Invalid token" });
+        return res.status(401).json({ message: error.code });
     }
 });
 
